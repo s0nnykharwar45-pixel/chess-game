@@ -1,0 +1,116 @@
+import chess
+
+# =========================
+# 🔹 Evaluation Function
+# =========================
+piece_values = {
+    chess.PAWN: 1,
+    chess.KNIGHT: 3,
+    chess.BISHOP: 3,
+    chess.ROOK: 5,
+    chess.QUEEN: 9,
+    chess.KING: 0
+}
+
+def evaluate(board):
+    score = 0
+    for piece_type in piece_values:
+        score += len(board.pieces(piece_type, chess.WHITE)) * piece_values[piece_type]
+        score -= len(board.pieces(piece_type, chess.BLACK)) * piece_values[piece_type]
+    return score
+
+
+# =========================
+# 🔹 Minimax Algorithm
+# =========================
+def minimax(board, depth, is_maximizing):
+    if depth == 0 or board.is_game_over():
+        return evaluate(board)
+
+    if is_maximizing:
+        max_eval = -9999
+        for move in board.legal_moves:
+            board.push(move)
+            eval = minimax(board, depth - 1, False)
+            board.pop()
+            max_eval = max(max_eval, eval)
+        return max_eval
+    else:
+        min_eval = 9999
+        for move in board.legal_moves:
+            board.push(move)
+            eval = minimax(board, depth - 1, True)
+            board.pop()
+            min_eval = min(min_eval, eval)
+        return min_eval
+
+
+# =========================
+# 🔹 Best Move Finder
+# =========================
+def best_move(board, depth):
+    best_val = -9999
+    best_mv = None
+
+    for move in board.legal_moves:
+        board.push(move)
+        value = minimax(board, depth - 1, False)
+        board.pop()
+
+        if value > best_val:
+            best_val = value
+            best_mv = move
+
+    return best_mv
+
+
+# =========================
+# 🎮 GAME START
+# =========================
+board = chess.Board()
+
+print("♟️ Welcome to Chess!")
+print("You are WHITE ♔")
+print("Enter moves like: e2e4\n")
+
+while not board.is_game_over():
+    print(board.unicode())
+    print("\n")
+
+    # 👤 HUMAN MOVE
+    if board.turn == chess.WHITE:
+        move_input = input("Your move: ")
+
+        try:
+            move = chess.Move.from_uci(move_input)
+
+            if move in board.legal_moves:
+                board.push(move)
+            else:
+                print("❌ Illegal move! Try again.")
+                continue
+
+        except:
+            print("❌ Invalid format! Use format like e2e4")
+            continue
+
+    # 🤖 AI MOVE
+    else:
+        print("🤖 AI thinking...")
+        move = best_move(board, 2)   # 🔧 change to 1 if slow
+        print("AI plays:", move)
+        board.push(move)
+
+
+# =========================
+# 🏁 GAME END
+# =========================
+print("\nFinal Position:")
+print(board.unicode())
+
+if board.is_checkmate():
+    print("♚ Checkmate!")
+elif board.is_stalemate():
+    print("Draw by stalemate!")
+else:
+    print("Game Over!")
