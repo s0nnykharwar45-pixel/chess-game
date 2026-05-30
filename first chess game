@@ -1,0 +1,36 @@
+board = chess.Board()
+
+print("Welcome to Chess! You are WHITE ♔")
+print("Enter moves like: e2e4\n")
+
+while not board.is_game_over():
+    print(board.unicode())
+    print("\n")
+
+    # 👤 HUMAN MOVE
+    if board.turn == chess.WHITE:
+        move_input = input("Your move: ")
+
+        try:
+            move = chess.Move.from_uci(move_input)
+
+            if move in board.legal_moves:
+                board.push(move)
+            else:
+                print("Illegal move! Try again.")
+                continue
+
+        except:
+            print("Invalid format! Use format like e2e4")
+            continue
+
+    # 🤖 AI MOVE
+    else:
+        print("AI thinking...")
+        move = best_move(board, 2)
+        print("AI plays:", move)
+        board.push(move)
+
+print("\nFinal Position:")
+print(board.unicode())
+print("Game Over!")
